@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useState} from "react";
 
 export const useAuthForms = () => {
     const [verifyForm, setVerifyForm] = useState({
@@ -10,12 +10,12 @@ export const useAuthForms = () => {
     });
 
     const handleVerifyChange = (e) => {
-        setVerifyForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        setVerifyForm(prev => ({...prev, [e.target.name]: e.target.value}));
     };
 
     const handleLoginChange = (e) => {
-        setLoginForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        setLoginForm(prev => ({...prev, [e.target.name]: e.target.value}));
     };
 
-    return { verifyForm, handleVerifyChange, loginForm, handleLoginChange };
+    return {verifyForm, handleVerifyChange, loginForm, handleLoginChange};
 };

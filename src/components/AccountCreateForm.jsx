@@ -1,4 +1,4 @@
-const AccountCreateForm = ({ currencyCode, setCurrencyCode, onCreate, loading }) => (
+const AccountCreateForm = ({currencyCode, setCurrencyCode, onCreate, loading}) => (
     <section>
         <h3>Создать счёт</h3>
         <select value={currencyCode} onChange={(e) => setCurrencyCode(e.target.value)}>

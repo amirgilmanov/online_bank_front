@@ -2,8 +2,8 @@ import React from 'react';
 
 const PARTNER_CATEGORIES = ['FOOD', 'ENTERTAINMENT', 'MEDICINE'];
 
-const PartnerCreateForm = ({ values, onChange, onSubmit, loading }) => (
-    <form onSubmit={onSubmit} style={{ maxWidth: '500px' }}>
+const PartnerCreateForm = ({values, onChange, onSubmit, loading}) => (
+    <form onSubmit={onSubmit} style={{maxWidth: '500px'}}>
         <h3>Создать нового партнера (ADMIN)</h3>
 
         <div className="form-group">
@@ -13,7 +13,7 @@ const PartnerCreateForm = ({ values, onChange, onSubmit, loading }) => (
                 type="text"
                 value={values.name}
                 onChange={onChange}
-                placeholder="Например: Пятерочка"
+                placeholder="Например: Монеточка"
                 required
                 disabled={loading}
             />

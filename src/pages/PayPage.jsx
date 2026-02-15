@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { PayApi } from '../api'; // Убедись, что в api.js экспорт с большой буквы
-import { usePayForm } from '../hooks/usePayForm';
+import React, {useState} from 'react';
+import {PayApi} from '../api'; // Убедись, что в api.js экспорт с большой буквы
+import {usePayForm} from '../hooks/usePayForm';
 import PayForm from '../components/PayForm';
 import OperationTable from '../components/OperationTable';
 
 const PayPage = () => {
-    const { values, handleChange, reset } = usePayForm();
+    const {values, handleChange, reset} = usePayForm();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [response, setResponse] = useState(null);
@@ -44,10 +44,10 @@ const PayPage = () => {
             {error && <div className="error-message" style={{color: 'red'}}>Ошибка: {error}</div>}
 
             {response && (
-                <div style={{ marginTop: '30px' }}>
+                <div style={{marginTop: '30px'}}>
                     <h3>Успешная операция:</h3>
                     {/* Переиспользуем нашу таблицу! Оборачиваем в массив. */}
-                    <OperationTable operations={[response]} />
+                    <OperationTable operations={[response]}/>
                 </div>
             )}
         </div>

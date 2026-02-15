@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { CodeApi } from '../api';
+import React, {useState} from 'react';
+import {CodeApi} from '../api';
 
 const CodePage = () => {
     const [loading, setLoading] = useState(false);
@@ -47,7 +47,7 @@ const CodePage = () => {
             <h2>Управление Verification кодами</h2>
 
             {/* Админ-секция */}
-            <section className="admin-box" style={{ marginBottom: '30px', padding: '20px', border: '1px dotted red' }}>
+            <section className="admin-box" style={{marginBottom: '30px', padding: '20px', border: '1px dotted red'}}>
                 <h3>Администрирование</h3>
                 <button
                     className="btn-danger"
@@ -59,7 +59,7 @@ const CodePage = () => {
             </section>
 
             {/* Форма перегенерации */}
-            <section style={{ maxWidth: '400px' }}>
+            <section style={{maxWidth: '400px'}}>
                 <h3>Перегенерация OTP</h3>
                 <form onSubmit={onRegenerate}>
                     <input
@@ -75,20 +75,21 @@ const CodePage = () => {
             </section>
 
             {/* Статус и результаты */}
-            <StatusMessages error={error} success={success} result={regenerateResult} />
+            <StatusMessages error={error} success={success} result={regenerateResult}/>
 
-            <footer style={{ marginTop: '30px', fontSize: '0.9em', color: '#666' }}>
-                <p><strong>Важно:</strong> Очистка кодов доступна только для ADMIN. Перегенерация отправит письмо пользователю.</p>
+            <footer style={{marginTop: '30px', fontSize: '0.9em', color: '#666'}}>
+                <p><strong>Важно:</strong> Очистка кодов доступна только для ADMIN. Перегенерация отправит письмо
+                    пользователю.</p>
             </footer>
         </div>
     );
 };
 
 // Маленький под-компонент для чистоты кода
-const StatusMessages = ({ error, success, result }) => (
-    <div style={{ marginTop: '20px' }}>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {success && <p style={{ color: 'green' }}>{success}</p>}
+const StatusMessages = ({error, success, result}) => (
+    <div style={{marginTop: '20px'}}>
+        {error && <p style={{color: 'red'}}>{error}</p>}
+        {success && <p style={{color: 'green'}}>{success}</p>}
         {result && (
             <div className="result-box">
                 <h4>Полученный код:</h4>

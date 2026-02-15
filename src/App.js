@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import './App.css';
 
 // Импорты страниц
@@ -19,18 +19,30 @@ function App() {
 
     const renderComponent = () => {
         switch (currentComponent) {
-            case 'account': return <AccountPage />;
-            case 'authentication': return <AuthenticationPage />;
-            case 'bonusAccount': return <BonusPage />;
-            case 'registration': return <RegistrationPage />;
-            case 'currency': return <CurrencyPage />;
-            case 'operation': return <OperationPage />;
-            case 'partner': return <PartnerPage />;
-            case 'pay': return <PayPage />;
-            case 'quest': return <QuestPage />;
-            case 'test': return <TestPage />;
-            case 'code': return <CodePage />;
-            default: return <RegistrationPage />;
+            case 'account':
+                return <AccountPage/>;
+            case 'authentication':
+                return <AuthenticationPage/>;
+            case 'bonusAccount':
+                return <BonusPage/>;
+            case 'registration':
+                return <RegistrationPage/>;
+            case 'currency':
+                return <CurrencyPage/>;
+            case 'operation':
+                return <OperationPage/>;
+            case 'partner':
+                return <PartnerPage/>;
+            case 'pay':
+                return <PayPage/>;
+            case 'quest':
+                return <QuestPage/>;
+            case 'test':
+                return <TestPage/>;
+            case 'code':
+                return <CodePage/>;
+            default:
+                return <RegistrationPage/>;
         }
     };
 
@@ -39,32 +51,32 @@ function App() {
         {
             title: "Пользователь",
             items: [
-                { id: 'authentication', label: 'Вход' },
-                { id: 'registration', label: 'Регистрация' },
-                { id: 'account', label: 'Мои счета' },
+                {id: 'authentication', label: 'Вход'},
+                {id: 'registration', label: 'Регистрация'},
+                {id: 'account', label: 'Мои счета'},
             ]
         },
         {
             title: "Финансы",
             items: [
-                { id: 'operation', label: 'Операции' },
-                { id: 'pay', label: 'Платежи' },
-                { id: 'bonusAccount', label: 'Бонусы' },
-                { id: 'currency', label: 'Валюты' },
+                {id: 'operation', label: 'Операции'},
+                {id: 'pay', label: 'Платежи'},
+                {id: 'bonusAccount', label: 'Бонусы'},
+                {id: 'currency', label: 'Валюты'},
             ]
         },
         {
             title: "Сервисы",
             items: [
-                { id: 'partner', label: 'Партнеры' },
-                { id: 'quest', label: 'Квесты' },
+                {id: 'partner', label: 'Партнеры'},
+                {id: 'quest', label: 'Квесты'},
             ]
         },
         {
             title: "Админ",
             items: [
-                { id: 'code', label: 'Коды' },
-                { id: 'test', label: 'Тесты' },
+                {id: 'code', label: 'Коды'},
+                {id: 'test', label: 'Тесты'},
             ]
         }
     ];

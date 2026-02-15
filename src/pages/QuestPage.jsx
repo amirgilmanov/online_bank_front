@@ -1,11 +1,29 @@
-import React, { useState } from 'react';
-import { QuestApi } from '../api'; // Убедись, что экспорт в api.js с большой буквы
+import React, {useEffect, useState} from 'react';
+import {QuestApi} from '../api';
 import QuestTable from '../components/QuestTable';
+import QuestList from "../components/QuestList";
 
 const QuestPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [quests, setQuests] = useState([]);
+
+    // Загрузка квестов пользователя
+    const fetchQuests = async () => {
+        setLoading(true);
+        try {
+            const data = await QuestApi.getUserQuests();
+            setQuests(data);
+        } catch (err) {
+            setError("Не удалось загрузить квесты");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchQuests();
+    }, []);
 
     const handleCreateRandomQuest = async () => {
         setLoading(true);
@@ -26,7 +44,7 @@ const QuestPage = () => {
         <div className="component-container">
             <h2>Управление квестами</h2>
 
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{marginBottom: '20px'}}>
                 <button
                     onClick={handleCreateRandomQuest}
                     disabled={loading}
@@ -35,11 +53,13 @@ const QuestPage = () => {
                 </button>
             </div>
 
-            {error && <div className="error-message" style={{ color: 'red' }}>Ошибка: {error}</div>}
+            {error && <div className="error-message" style={{color: 'red'}}>Ошибка: {error}</div>}
 
-            <QuestTable quests={quests} />
+            <QuestTable quests={quests}/>
 
-            <div style={{ marginTop: '30px', padding: '15px', border: '1px solid #eee' }}>
+            <QuestList quests={quests}/>
+
+            <div style={{marginTop: '30px', padding: '15px', border: '1px solid #eee'}}>
                 <p><strong>Примечание:</strong> Данный метод доступен только пользователям с ролью ADMIN.</p>
             </div>
         </div>

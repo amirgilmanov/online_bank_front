@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useState} from "react";
 
 export const useBuyForm = () => { // 2. Хук — это функция
     // 3. Создаем состояние внутри
@@ -10,7 +10,7 @@ export const useBuyForm = () => { // 2. Хук — это функция
 
     // 4. Логика изменения (handleChange) должна быть внутри хука
     const handleBuyChange = (e) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setBuyForm((prev) => ({
             ...prev,
             [name]: value
@@ -18,5 +18,5 @@ export const useBuyForm = () => { // 2. Хук — это функция
     };
 
     // 5. Возвращаем объект или массив с данными и функцией
-    return { buyForm, handleBuyChange, setBuyForm };
+    return {buyForm, handleBuyChange, setBuyForm};
 };

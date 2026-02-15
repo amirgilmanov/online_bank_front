@@ -1,8 +1,13 @@
 export const TokenService = {
     save: (data) => {
-        const tokens = data.tokens;
-        if (tokens?.accessToken) localStorage.setItem("accessToken", tokens.accessToken);
-        if (tokens?.refreshToken) localStorage.setItem("refreshToken", tokens.refreshToken);
+        // Проверяем, лежат ли токены в поле tokens или в корне объекта
+        const accessToken = data.tokens?.accessToken || data.accessToken;
+        const refreshToken = data.tokens?.refreshToken || data.refreshToken;
+
+        if (accessToken) localStorage.setItem("accessToken", accessToken);
+        if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+
+        console.log("Tokens saved successfully");
     },
     clear: () => {
         localStorage.removeItem("accessToken");
@@ -10,3 +15,6 @@ export const TokenService = {
     },
     getRefresh: () => localStorage.getItem("refreshToken")
 };
+
+export class tokenService {
+}

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { OperationApi } from '../api';
-import { useForm } from '../hooks/useForm'; // Тот самый универсальный хук
+import React, {useState} from 'react';
+import {OperationApi} from '../api';
+import {useForm} from '../hooks/useForm'; // Тот самый универсальный хук
 import OperationTable from '../components/OperationTable';
 
 const OperationPage = () => {
@@ -9,7 +9,7 @@ const OperationPage = () => {
     const [operations, setOperations] = useState([]);
 
     // ОШИБКА БЫЛА ТУТ: Убедись, что все поля объявлены в начальном состоянии
-    const { values, handleChange } = useForm({
+    const {values, handleChange} = useForm({
         baseAccountNumber: '', // Должно быть в точности как в input name
         targetAccountNumber: '',
         amount: '',
@@ -77,8 +77,8 @@ const OperationPage = () => {
 
             {error && <p className="error" style={{color: 'red'}}>{error}</p>}
 
-            <div style={{ marginTop: '20px' }}>
-                <OperationTable operations={operations} />
+            <div style={{marginTop: '20px'}}>
+                <OperationTable operations={operations}/>
             </div>
         </div>
     );

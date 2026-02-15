@@ -4,7 +4,7 @@ export const useAccountForm = () => {
     const [currencyCode, setCurrencyCode] = useState("USD");
     // баланс
     const [accountNumber, setAccountNumber] = useState("");
-    return{
+    return {
         currencyCode,
         setCurrencyCode,
         accountNumber,

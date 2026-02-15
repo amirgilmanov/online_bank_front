@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useState} from "react";
 
 export const useOperationForm = () => {
     const [form, setForm] = useState({
@@ -6,8 +6,8 @@ export const useOperationForm = () => {
     });
 
     const handleChange = (e) => {
-        setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+        setForm(prev => ({...prev, [e.target.name]: e.target.value}));
     };
 
-    return { form, handleChange };
+    return {form, handleChange};
 };

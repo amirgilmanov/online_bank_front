@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TestApi } from '../api';
+import React, {useState} from 'react';
+import {TestApi} from '../api';
 
 const TestPage = () => {
     const [loading, setLoading] = useState(false);
@@ -14,7 +14,7 @@ const TestPage = () => {
         setResponse(null);
         try {
             const data = await requestFn();
-            setResponse({ type: resultType, data });
+            setResponse({type: resultType, data});
         } catch (err) {
             setError(err.message);
         } finally {
@@ -34,9 +34,9 @@ const TestPage = () => {
             <h2>Тестовая лаборатория</h2>
 
             {/* Секция кнопок */}
-            <section style={{ marginBottom: '30px' }}>
+            <section style={{marginBottom: '30px'}}>
                 <h3>Проверка API</h3>
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{display: 'flex', gap: '10px'}}>
                     <button onClick={() => execute(TestApi.test, 'json')} disabled={loading}>
                         Выполнить API Тест
                     </button>
@@ -47,7 +47,7 @@ const TestPage = () => {
             </section>
 
             {/* Форма отправки Email */}
-            <form onSubmit={onEmailSubmit} style={{ marginBottom: '30px', maxWidth: '400px' }}>
+            <form onSubmit={onEmailSubmit} style={{marginBottom: '30px', maxWidth: '400px'}}>
                 <h3>Тест почтового сервера</h3>
                 <div className="form-group">
                     <input
@@ -65,23 +65,23 @@ const TestPage = () => {
             </form>
 
             {/* Вывод ошибок и результатов */}
-            {error && <div className="error-message" style={{ color: 'red' }}>Ошибка: {error}</div>}
+            {error && <div className="error-message" style={{color: 'red'}}>Ошибка: {error}</div>}
 
-            <ResultDisplay response={response} />
+            <ResultDisplay response={response}/>
         </div>
     );
 };
 
 // Вспомогательный компонент для отображения разных типов данных
-const ResultDisplay = ({ response }) => {
+const ResultDisplay = ({response}) => {
     if (!response) return null;
 
     return (
-        <div className="data-display" style={{ marginTop: '20px', padding: '15px', background: '#f9f9f9' }}>
+        <div className="data-display" style={{marginTop: '20px', padding: '15px', background: '#f9f9f9'}}>
             <h3>Результат:</h3>
             {response.type === 'json' && <pre>{JSON.stringify(response.data, null, 2)}</pre>}
             {response.type === 'text' && <p>{response.data}</p>}
-            {response.type === 'email' && <p style={{ color: 'green' }}>✓ {response.data || 'Запрос обработан'}</p>}
+            {response.type === 'email' && <p style={{color: 'green'}}>✓ {response.data || 'Запрос обработан'}</p>}
         </div>
     );
 };

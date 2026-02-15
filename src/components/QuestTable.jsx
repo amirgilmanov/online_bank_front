@@ -1,6 +1,6 @@
 import React from 'react';
 
-const QuestTable = ({ quests }) => {
+const QuestTable = ({quests}) => {
     if (!quests || quests.length === 0) return null;
 
     return (

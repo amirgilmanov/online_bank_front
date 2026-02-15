@@ -1,6 +1,6 @@
 import React from "react";
 
-const OperationTable = ({operations }) => {
+const OperationTable = ({operations}) => {
     if (!operations?.length) return null;
     return (
         <table>
@@ -16,10 +16,10 @@ const OperationTable = ({operations }) => {
             </thead>
             <tbody>
             {operations.map((op) => (
-                <tr key={op.operationId}>
+                <tr key={op.id}>
                     <td>{op.accountNumber}</td>
-                    <td>{op.createdAt}</td>
-                    <td>{op.operationId}</td>
+                    <td>{new Date(op.createdAt).toLocaleString()}</td>
+                    <td>{op.id}</td>
                     <td>{op.operationType}</td>
                     <td>{op.description}</td>
                     <td>{op.currencyCode}</td>

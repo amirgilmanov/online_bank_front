@@ -32,8 +32,8 @@ api.interceptors.response.use(
             const refreshToken = localStorage.getItem("refreshToken");
             if (refreshToken) {
                 try {
-                    const res = await axios.post("http://localhost:8080/api/silent", { refreshToken });
-                    const { accessToken, refreshToken: newRefreshToken } = res.data;
+                    const res = await axios.post("http://localhost:8080/api/silent", {refreshToken});
+                    const {accessToken, refreshToken: newRefreshToken} = res.data;
                     localStorage.setItem("accessToken", accessToken);
                     localStorage.setItem("refreshToken", newRefreshToken);
                     originalRequest.headers.Authorization = `Bearer ${accessToken}`;

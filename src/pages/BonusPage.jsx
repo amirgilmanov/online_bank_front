@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { BonusApi } from "../api";
-import { useBonusForm } from "../hooks/useBonusForm";
+import React, {useState} from "react";
+import {BonusApi} from "../api";
+import {useBonusForm} from "../hooks/useBonusForm";
 import OperationTable from "../components/OperationTable";
 
 const BonusPage = () => {
-    const { form, handleChange } = useBonusForm();
+    const {form, handleChange} = useBonusForm();
 
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -52,9 +52,9 @@ const BonusPage = () => {
             {/* Переиспользуем таблицу операций!
                 Оборачиваем результат в массив [result], так как таблица ждет массив */}
             {result && (
-                <section style={{ marginTop: '20px' }}>
+                <section style={{marginTop: '20px'}}>
                     <h3>Результат конвертации</h3>
-                    <OperationTable operations={[result]} />
+                    <OperationTable operations={[result]}/>
                 </section>
             )}
         </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useState} from "react";
 
 export const useBonusForm = () => {
     const [form, setForm] = useState({
@@ -7,9 +7,9 @@ export const useBonusForm = () => {
     });
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setForm(prev => ({ ...prev, [name]: value }));
+        const {name, value} = e.target;
+        setForm(prev => ({...prev, [name]: value}));
     };
 
-    return { form, handleChange };
+    return {form, handleChange};
 };

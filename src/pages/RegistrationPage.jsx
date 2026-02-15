@@ -1,27 +1,51 @@
-import React, { useState } from "react";
-import { RegistrationApi, CodeApi } from "../api"; // Добавили CodeApi
-import { useForm } from "../hooks/useForm";
-import RegistrationForm from "../components/RegistrationForm";
+import React, {useState} from "react";
+// ДОБАВИЛИ CodeApi в импорт
+import {AuthApi, CodeApi, RegistrationApi} from "../api";
+import {useForm} from "../hooks/useForm";
+import RegistrationForm, {VerifySection} from "../components/RegistrationForm";
+import {getDeviceName} from "../utils/deviceService";
 
 const RegistrationPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
-    const [lastEmail, setLastEmail] = useState(""); // Запоминаем email для повторной отправки
+    const [verified, setVerified] = useState(false);
 
-    const { values, handleChange, reset } = useForm({
+    // ДОБАВИЛИ состояние для статуса переотправки
+    const [resendStatus, setResendStatus] = useState("");
+
+    const [verifyForm, setVerifyForm] = useState({
+        email: "",
+        code: "",
+        deviceName: getDeviceName(),
+        userAgent: navigator.userAgent
+    });
+
+    const {values, handleChange, reset} = useForm({
         name: "", surname: "", patronymic: "", phone: "", password: "", email: "",
     });
+
+    // Функция переотправки кода
+    const handleResendCode = async () => {
+        setLoading(true);
+        setError(null);
+        setResendStatus("");
+        try {
+            await CodeApi.regenerateOtp(verifyForm.email);
+            setResendStatus("Новый код отправлен на почту!");
+        } catch (err) {
+            setError("Не удалось отправить код: " + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleRegister = async (apiMethod) => {
         setLoading(true);
         setError(null);
-        setSuccess(false);
-
         try {
-            const emailToSave = values.email; // Сохраняем email перед очисткой формы
             await apiMethod(values);
-            setLastEmail(emailToSave);
+            setVerifyForm(prev => ({...prev, email: values.email}));
             setSuccess(true);
             reset();
         } catch (err) {
@@ -31,47 +55,62 @@ const RegistrationPage = () => {
         }
     };
 
-    const handleResend = async () => {
+    const handleVerify = async () => {
         setLoading(true);
         setError(null);
         try {
-            await CodeApi.regenerateOtp(lastEmail);
-            alert(`Новый код успешно отправлен на ${lastEmail}`);
+            const response = await AuthApi.verifyEmail(verifyForm);
+            if (response.tokens) {
+                localStorage.setItem("accessToken", response.tokens.accessToken);
+                localStorage.setItem("refreshToken", response.tokens.refreshToken);
+            }
+            setVerified(true);
+            setSuccess(false);
         } catch (err) {
-            setError("Не удалось отправить код повторно: " + err.message);
+            setError("Ошибка верификации: " + err.message);
         } finally {
             setLoading(false);
         }
     };
 
+    // ОСТАВЛЯЕМ ОДИН ЧИСТЫЙ RETURN
     return (
         <div className="container">
-            <h2>Регистрация в системе</h2>
-
-            <RegistrationForm
-                values={values}
-                onChange={handleChange}
-                onSubmit={(e) => { e.preventDefault(); handleRegister(RegistrationApi.signUp); }}
-                onAdminSubmit={() => handleRegister(RegistrationApi.signUpAdmin)}
-                loading={loading}
-            />
-
-            {error && <p className="error" style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
-
-            {success && (
-                <div style={{ marginTop: '20px', padding: '15px', border: '1px solid green', borderRadius: '8px' }}>
-                    <p className="success" style={{ color: 'green', margin: 0 }}>
-                        Код подтверждения отправлен на почту. Подтвердите владение почтой!
-                    </p>
-                    <button
-                        onClick={handleResend}
-                        disabled={loading}
-                        style={{ marginTop: '10px', cursor: 'pointer' }}
-                    >
-                        {loading ? "Отправка..." : "Отправить код еще раз"}
-                    </button>
-                </div>
+            {/* 1. Экран регистрации */}
+            {!success && !verified && (
+                <>
+                    <h2>Регистрация</h2>
+                    <RegistrationForm
+                        values={values}
+                        onChange={handleChange}
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleRegister(RegistrationApi.signUp);
+                        }}
+                        onAdminSubmit={() => handleRegister(RegistrationApi.signUpAdmin)}
+                        loading={loading}
+                    />
+                </>
             )}
+
+            {/* 2. Экран верификации */}
+            {success && !verified && (
+                <>
+                    <VerifySection
+                        form={verifyForm}
+                        onChange={(e) => setVerifyForm({...verifyForm, [e.target.name]: e.target.value})}
+                        onVerify={handleVerify}
+                        onResend={handleResendCode} // Теперь пропс передается верно
+                        loading={loading}
+                    />
+                    {resendStatus && <p style={{color: 'blue', marginTop: '10px'}}>{resendStatus}</p>}
+                </>
+            )}
+
+            {/* 3. Финальный экран */}
+            {verified && <h2 style={{color: 'green'}}>Поздравляем! Регистрация и верификация завершены.</h2>}
+
+            {error && <p style={{color: 'red', marginTop: '10px'}}>{error}</p>}
         </div>
     );
 };

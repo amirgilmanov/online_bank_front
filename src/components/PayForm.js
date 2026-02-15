@@ -2,8 +2,8 @@ import React from 'react';
 
 const CATEGORIES = ['FOOD', 'ENTERTAINMENT', 'MEDICINE'];
 
-const PayForm = ({ values, onChange, onSubmit, loading }) => (
-    <form onSubmit={onSubmit} style={{ maxWidth: '600px' }}>
+const PayForm = ({values, onChange, onSubmit, loading}) => (
+    <form onSubmit={onSubmit} style={{maxWidth: '600px'}}>
         <h3>Отправитель</h3>
         <input
             placeholder="Счет отправителя"

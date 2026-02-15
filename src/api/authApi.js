@@ -13,7 +13,7 @@ export const AuthApi = {
 
     logout: async () => {
         const refreshToken = localStorage.getItem("refreshToken");
-        await api.post("/api/logout", { refreshToken });
+        await api.post("/api/logout", {refreshToken});
         localStorage.clear();
     }
 };

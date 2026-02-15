@@ -1,9 +1,9 @@
-import { useState } from "react";
+import {useState} from "react";
 
 export const usePayForm = () => {
     const initialState = {
-        senderInfo: { accountNumber: '', bankName: '' },
-        serviceInfo: { serviceName: '', accountNumber: '', bankName: '' },
+        senderInfo: {accountNumber: '', bankName: ''},
+        serviceInfo: {serviceName: '', accountNumber: '', bankName: ''},
         serviceRequestAmount: '',
         category: 'RESTAURANT',
     };
@@ -14,14 +14,14 @@ export const usePayForm = () => {
         if (section) {
             setValues(prev => ({
                 ...prev,
-                [section]: { ...prev[section], [field]: value }
+                [section]: {...prev[section], [field]: value}
             }));
         } else {
-            setValues(prev => ({ ...prev, [field]: value }));
+            setValues(prev => ({...prev, [field]: value}));
         }
     };
 
     const reset = () => setValues(initialState);
 
-    return { values, handleChange, reset };
+    return {values, handleChange, reset};
 };
