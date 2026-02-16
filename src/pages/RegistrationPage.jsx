@@ -108,7 +108,7 @@ const RegistrationPage = () => {
             )}
 
             {/* 3. Финальный экран */}
-            {verified && <h2 style={{color: 'green'}}>Поздравляем! Регистрация и верификация завершены.</h2>}
+            {verified && <h2 style={{color: 'green'}}>Регистрация завершена.</h2>}
 
             {error && <p style={{color: 'red', marginTop: '10px'}}>{error}</p>}
         </div>

@@ -60,7 +60,6 @@ const AuthenticationPage = () => {
 
             {loading && <p>Загрузка...</p>}
             {error && <p className="error" style={{color: 'red'}}>{error}</p>}
-            {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
         </div>
     );
 };

@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
-import {OperationApi} from '../api';
-import {useForm} from '../hooks/useForm'; // Тот самый универсальный хук
+import React, { useState } from 'react';
+import { OperationApi } from '../api';
+import { useForm } from '../hooks/useForm';
 import OperationTable from '../components/OperationTable';
 
 const OperationPage = () => {
@@ -8,25 +8,30 @@ const OperationPage = () => {
     const [error, setError] = useState(null);
     const [operations, setOperations] = useState([]);
 
-    // ОШИБКА БЫЛА ТУТ: Убедись, что все поля объявлены в начальном состоянии
-    const {values, handleChange} = useForm({
-        baseAccountNumber: '', // Должно быть в точности как в input name
-        targetAccountNumber: '',
+    // Начальные значения соответствуют FinanceOperationDto
+    const { values, handleChange, resetForm } = useForm({
+        accountNumber: '',
         amount: '',
-        description: ''
+        description: '',
+        selectedCurrencyCode: 'RUB' // Значение по умолчанию
     });
 
-    const handleTransfer = async (e) => {
-        e.preventDefault();
+    // Общая функция для вызова API
+    const executeOperation = async (apiMethod) => {
         setLoading(true);
         setError(null);
         try {
-            const result = await OperationApi.transfer({
+            const payload = {
                 ...values,
                 amount: parseFloat(values.amount)
-            });
-            // Если сервер возвращает одну операцию, кладем её в массив для таблицы
-            setOperations(Array.isArray(result) ? result : [result]);
+            };
+
+            const result = await apiMethod(payload);
+
+            // Добавляем результат в начало списка операций
+            setOperations(prev => [result, ...prev]);
+            // Очищаем форму после успеха (опционально)
+            // resetForm();
         } catch (err) {
             setError(err.message);
         } finally {
@@ -36,25 +41,16 @@ const OperationPage = () => {
 
     return (
         <div className="container">
-            <h2>Перевод средств</h2>
+            <h2>Операции со счетом</h2>
 
-            <form onSubmit={handleTransfer}>
+            <div className="card" style={{ padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
                 <div className="form-group">
-                    <label>Счет отправителя:</label>
+                    <label>Номер счета:</label>
                     <input
-                        name="baseAccountNumber" // Имя должно совпадать с ключом в useForm
-                        value={values.baseAccountNumber || ''} // Защита: если values вдруг undefined
+                        name="accountNumber"
+                        value={values.accountNumber || ''}
                         onChange={handleChange}
-                        required
-                    />
-                </div>
-
-                <div className="form-group">
-                    <label>Счет получателя:</label>
-                    <input
-                        name="targetAccountNumber"
-                        value={values.targetAccountNumber || ''}
-                        onChange={handleChange}
+                        placeholder="0000000000000000"
                         required
                     />
                 </div>
@@ -70,15 +66,53 @@ const OperationPage = () => {
                     />
                 </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Отправка...' : 'Перевести'}
-                </button>
-            </form>
+                <div className="form-group">
+                    <label>Валюта операции:</label>
+                    <select
+                        name="selectedCurrencyCode"
+                        value={values.selectedCurrencyCode}
+                        onChange={handleChange}
+                    >
+                        <option value="RUB">RUB</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                    </select>
+                </div>
 
-            {error && <p className="error" style={{color: 'red'}}>{error}</p>}
+                <div className="form-group">
+                    <label>Описание:</label>
+                    <input
+                        name="description"
+                        value={values.description || ''}
+                        onChange={handleChange}
+                        placeholder="Назначение платежа"
+                    />
+                </div>
 
-            <div style={{marginTop: '20px'}}>
-                <OperationTable operations={operations}/>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                    <button
+                        onClick={() => executeOperation(OperationApi.receive)}
+                        disabled={loading}
+                        className="btn-success"
+                    >
+                        {loading ? '...' : 'Пополнить'}
+                    </button>
+
+                    <button
+                        onClick={() => executeOperation(OperationApi.withdraw)}
+                        disabled={loading}
+                        className="btn-danger"
+                    >
+                        {loading ? '...' : 'Снять'}
+                    </button>
+                </div>
+            </div>
+
+            {error && <p className="error" style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
+
+            <div style={{ marginTop: '30px' }}>
+                <h3>История текущей сессии</h3>
+                <OperationTable operations={operations} />
             </div>
         </div>
     );
