@@ -3,32 +3,37 @@ import React from "react";
 const AccountTable = ({accounts, onShowHistory}) => {
     if (accounts.length === 0) return null;
     return (
-        <table>
-            <thead>
-            <tr>
-                <th>Номер</th>
-                <th>Валюта</th>
-                <th>Баланс</th>
-                <th>Владелец</th>
-                <th>Действие</th>
-            </tr>
-            </thead>
-            <tbody>
-            {accounts.map((acc) => (
-                <tr key={acc.accountNumber}>
-                    <td>{acc.accountNumber}</td>
-                    <td>{acc.currencyCode}</td>
-                    <td>{acc.balance}</td>
-                    <td>{`${acc.holderName} ${acc.holderSurname}`}</td>
-                    <td>
-                        <button onClick={() => onShowHistory(acc.accountNumber)}>
-                            История
-                        </button>
-                    </td>
+        <div className="table-responsive">
+            <table className="styled-table">
+                <thead>
+                <tr>
+                    <th>Номер счета</th>
+                    <th>Валюта</th>
+                    <th>Баланс</th>
+                    <th>Владелец</th>
+                    <th style={{ textAlign: 'center' }}>Действие</th>
                 </tr>
-            ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                {accounts.map((acc) => (
+                    <tr key={acc.accountNumber}>
+                        <td className="mono">{acc.accountNumber}</td>
+                        <td><span className="badge-currency">{acc.currencyCode}</span></td>
+                        <td className="amount">{acc.balance.toLocaleString()}</td>
+                        <td>{`${acc.holderName} ${acc.holderSurname}`}</td>
+                        <td style={{ textAlign: 'center' }}>
+                            <button
+                                className="btn-history"
+                                onClick={() => onShowHistory(acc.accountNumber)}
+                            >
+                                История
+                            </button>
+                        </td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
+        </div>
     );
 };
 

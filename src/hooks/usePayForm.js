@@ -1,27 +1,46 @@
-import {useState} from "react";
+import { useState } from "react";
 
 export const usePayForm = () => {
     const initialState = {
-        senderInfo: {accountNumber: '', bankName: ''},
-        serviceInfo: {serviceName: '', accountNumber: '', bankName: ''},
+        senderInfo: {
+            name: '',
+            surname: '',
+            patronymic: '',
+            accountNumberFrom: ''
+        },
+        serviceInfo: {
+            partnerName: '',
+            accountCurrencyCode: 'RUB'
+        },
         serviceRequestAmount: '',
-        category: 'RESTAURANT',
+        category: 'FOOD',
     };
 
     const [values, setValues] = useState(initialState);
 
-    const handleChange = (section, field, value) => {
-        if (section) {
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        // Если имя поля содержит точку, например "senderInfo.name"
+        if (name.includes('.')) {
+            const [section, field] = name.split('.');
             setValues(prev => ({
                 ...prev,
-                [section]: {...prev[section], [field]: value}
+                [section]: {
+                    ...prev[section],
+                    [field]: value
+                }
             }));
         } else {
-            setValues(prev => ({...prev, [field]: value}));
+            // Для простых полей: category, serviceRequestAmount
+            setValues(prev => ({
+                ...prev,
+                [name]: value
+            }));
         }
     };
 
     const reset = () => setValues(initialState);
 
-    return {values, handleChange, reset};
+    return { values, handleChange, reset };
 };

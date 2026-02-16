@@ -114,3 +114,33 @@
     font-size: 20px;
     fill: currentColor;
 }
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.95rem;
+}
+
+.styled-table th {
+    background-color: #f8f9fa;
+    color: #444;
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.styled-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.mono { font-family: 'Courier New', monospace; font-weight: bold; }
+.amount { color: #28a745; font-weight: bold; }
+.badge-currency {
+    background: #e9ecef;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}

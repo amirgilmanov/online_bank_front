@@ -1,11 +1,18 @@
 import React, {useState} from 'react';
 import {TestApi} from '../api';
 
+import { getUserRole } from "../utils/authUtils";
 const TestPage = () => {
+    const userRole = getUserRole();
+    const isAdmin = userRole === "ROLE_ADMIN";
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [response, setResponse] = useState(null);
     const [email, setEmail] = useState('');
+
+    if (!isAdmin) {
+        return null;
+    }
 
     // Универсальная обертка для запросов
     const execute = async (requestFn, resultType) => {

@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {PayApi} from '../api'; // Убедись, что в api.js экспорт с большой буквы
+import {PayApi} from '../api';
 import {usePayForm} from '../hooks/usePayForm';
 import PayForm from '../components/PayForm';
 import OperationTable from '../components/OperationTable';
