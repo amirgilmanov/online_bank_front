@@ -9,7 +9,6 @@ const api = axios.create({
     },
 });
 
-
 // 1. Интерцептор запроса: динамически берем токен из хранилища
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("accessToken");
@@ -27,11 +26,11 @@ const processQueue = (error, token = null) => {
         if (error) {
             prom.reject(error);
         } else {
-            prom.resolve(token)
+            prom.resolve(token);
         }
     });
     failedQueue = [];
-}
+};
 
 // 2. Интерцептор ответа: обработка 401 (Refresh Token) и ошибок бэкенда
 api.interceptors.response.use(
@@ -39,7 +38,7 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Если 401 ошибка и мы еще не пробовали обновить токен
+        // --- ЛОГИКА REFRESH TOKEN (401) ---
         if (error.response?.status === 401 && !originalRequest._retry) {
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
@@ -47,21 +46,26 @@ api.interceptors.response.use(
                 })
                     .then(token => {
                         originalRequest.headers['Authorization'] = 'Bearer ' + token;
-                        return api(originalRequest)
+                        return api(originalRequest);
                     })
                     .catch(err => Promise.reject(err));
             }
+
             originalRequest._retry = true;
             isRefreshing = true;
 
             const refreshToken = localStorage.getItem("refreshToken");
+            const deviceId = localStorage.getItem("deviceId");
 
             if (refreshToken) {
                 try {
-                    // Используем отдельный запрос для обновления, чтобы не зациклиться
-                    const res = await axios.post(`${API_URL}/api/silent`, {token: refreshToken});
+                    // ВАЖНО: твой silentLogin в AuthenticationService ожидает token и deviceId
+                    const res = await axios.post(`${API_URL}/api/silent`, {
+                        token: refreshToken,
+                        deviceId: deviceId
+                    });
 
-                    // Универсальная проверка: если бэкенд обернул в tokens или отдал сразу
+                    // Твой AuthenticationResponseDto возвращает { tokens: { accessToken, refreshToken } }
                     const data = res.data.tokens || res.data;
                     const {accessToken, refreshToken: newRefresh} = data;
 
@@ -71,13 +75,13 @@ api.interceptors.response.use(
                     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
                     originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
 
-                    // Обновляем заголовок в упавшем запросе и повторяем его
-                    processQueue(null, accessToken); // Выполняем все запросы из очереди
+                    processQueue(null, accessToken);
                     return api(originalRequest);
                 } catch (refreshError) {
                     processQueue(refreshError, null);
                     localStorage.clear();
-                    window.location.href = "/login";
+                    // Редирект на логин, если сессия полностью протухла
+                    window.location.href = "/";
                     return Promise.reject(refreshError);
                 } finally {
                     isRefreshing = false;
@@ -85,15 +89,19 @@ api.interceptors.response.use(
             }
         }
 
-        // Улучшенная обработка ошибок от твоего AdviceController
+        // --- УЛУЧШЕННАЯ ОБРАБОТКА ОШИБОК (403, 400, 404 и т.д.) ---
         if (error.response && error.response.data) {
             const serverData = error.response.data;
 
             if (typeof serverData === 'object' && serverData !== null) {
-                // Если прилетел объект ошибок (валидация), склеиваем их
-                error.message = Object.values(serverData).join(", ");
+                // Если прилетел DeviceIdIsBlankException, пробрасываем deviceId в объект ошибки
+                if (serverData.deviceId) {
+                    error.deviceId = serverData.deviceId;
+                }
+
+                // Если есть поле message, берем его, иначе склеиваем все значения полей (для валидации)
+                error.message = serverData.message || Object.values(serverData).join(", ");
             } else if (typeof serverData === 'string') {
-                // Если прилетела просто строка ошибки
                 error.message = serverData;
             }
         }
@@ -111,16 +119,23 @@ const request = (method, url, data = null, params = null) =>
 // ============================
 
 export const RegistrationApi = {
-    signUp: (data) => request("post", "/api/sign-up", data),
-    signUpAdmin: (data) => request("post", "/api/sign-up/admin", data),
+    // Метод для первичной регистрации (отправка данных пользователя)
+    signUp: (data) => api.post("/api/sign-up", data),
+
+    // Метод для регистрации админа
+    signUpAdmin: (data) => api.post("/api/sign-up/admin", data),
+
+    // Метод для подтверждения кода после регистрации (ТОТ САМЫЙ, КОТОРОГО НЕ ХВАТАЛО)
+    verifyFirst: (verifyData) => api.post("/api/first-auth-verify/first/email", verifyData)
 };
 
 export const AuthApi = {
-    login: (data) => request("post", "/api/login", data),
-    // Возвращает токены после ввода OTP кода
-    verifyEmail: (data) => request("post", "/api/first-auth-verify/email", data),
-    silentLogin: (token) => request("post", "/api/silent", {token}),
-    logout: (token) => request("post", "/api/logout", {token}),
+    login: (loginData) => api.post("/api/login", loginData),
+
+    // Верификация существующего пользователя (вход с нового устройства / UA mismatch)
+    verifyDefault: (verifyData) => api.post("/api/first-auth-verify/default/email", verifyData),
+
+    logout: (token, deviceId) => api.post("/api/logout", {token, deviceId})
 };
 
 export const AccountApi = {

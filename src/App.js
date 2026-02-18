@@ -12,16 +12,29 @@ import QuestPage from "./pages/QuestPage";
 import TestPage from "./pages/TestPage";
 import CodePage from "./pages/CodePage";
 import { getUserRole } from "./utils/authUtils";
+import { TokenService } from "./utils/tokenService";
 
 function App() {
+    const userRole = getUserRole();
+    const isAuthenticated = !!TokenService.getRefresh();
+
+    // ГИБКАЯ ИНИЦИАЛИЗАЦИЯ:
+    // Если пользователь авторизован, открываем 'account', если нет — 'authentication'
+    const [currentComponent, setCurrentComponent] = useState(
+        isAuthenticated ? 'account' : 'authentication'
+    );
+
+    const handleLogout = () => {
+        TokenService.clear();
+        window.location.reload(); // Полный сброс всех состояний
+    };
+
     const menuGroups = [
         {
             title: "Пользователь",
             items: [
-                // Оставляем оба ID, чтобы в боковом меню подсвечивалась нужная кнопка,
-                // но renderComponent вернет один и тот же AuthenticationPage
-                { id: 'authentication', label: 'Вход' },
-                // { id: 'registration', label: 'Регистрация' },
+                // Показываем "Вход" только если НЕ авторизован
+                ...(!isAuthenticated ? [{ id: 'authentication', label: 'Вход' }] : []),
                 { id: 'account', label: 'Мои счета' },
             ]
         },
@@ -50,13 +63,8 @@ function App() {
         }
     ];
 
-    // Установили 'authentication' как стартовый экран
-    const [currentComponent, setCurrentComponent] = useState('authentication');
-    const userRole = getUserRole();
-
-    // Фильтруем группы меню
+    // Фильтруем группы меню (логика админа)
     const filteredMenuGroups = menuGroups.filter(group => {
-        // Если группа "Админ", показываем её только админу
         if (group.title === "Админ") {
             return userRole === "ROLE_ADMIN";
         }
@@ -64,8 +72,13 @@ function App() {
     });
 
     const renderComponent = () => {
-        // Проверка на админа для конкретных кейсов
         const isAdmin = userRole === "ROLE_ADMIN";
+
+        // Если пользователь залогинен, но текущий компонент 'authentication',
+        // автоматически переключаем на 'account'
+        if (isAuthenticated && (currentComponent === 'authentication' || currentComponent === 'registration')) {
+            return <AccountPage />;
+        }
 
         switch (currentComponent) {
             case 'account':
@@ -75,7 +88,7 @@ function App() {
                 return <AuthenticationPage
                     initialMode={currentComponent}
                     onSuccess={() => setCurrentComponent('account')}
-                    userRole={userRole} // Не забудь передать роль сюда
+                    userRole={userRole}
                 />;
             case 'bonusAccount':
                 return <BonusPage />;
@@ -92,12 +105,12 @@ function App() {
 
             // ЗАЩИЩЕННЫЕ РОУТЫ
             case 'test':
-                return isAdmin ? <TestPage /> : null; // Если не админ, просто ничего не рендерим
+                return isAdmin ? <TestPage /> : null;
             case 'code':
                 return isAdmin ? <CodePage /> : null;
 
             default:
-                return <AuthenticationPage />;
+                return isAuthenticated ? <AccountPage /> : <AuthenticationPage />;
         }
     };
 
@@ -117,12 +130,24 @@ function App() {
                                     className={`menu-item ${currentComponent === item.id ? 'active' : ''}`}
                                     onClick={() => setCurrentComponent(item.id)}
                                 >
-                                    <span className="icon-wrapper"></span>
                                     <span className="menu-label">{item.label}</span>
                                 </button>
                             ))}
                         </div>
                     ))}
+
+                    {/* Кнопка выхода */}
+                    {isAuthenticated && (
+                        <div className="menu-group" style={{ marginTop: 'auto' }}>
+                            <button
+                                className="menu-item logout-btn"
+                                onClick={handleLogout}
+                                style={{ color: '#dc3545', border: 'none', background: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
+                            >
+                                <span className="menu-label">Выйти</span>
+                            </button>
+                        </div>
+                    )}
                 </nav>
             </aside>
 

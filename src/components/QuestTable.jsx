@@ -1,29 +1,30 @@
 import React from 'react';
 
-const QuestTable = ({quests}) => {
+const QuestTable = ({ quests }) => {
     if (!quests || quests.length === 0) return null;
 
     return (
-        <div className="data-display">
-            <h3>Список квестов:</h3>
+        <div className="data-display" style={{ marginBottom: '30px' }}>
             <table>
                 <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Название</th>
-                    <th>Описание</th>
+                    <th>Категория</th>
+                    <th>Прогресс</th>
+                    <th>Цель</th>
                     <th>Награда</th>
-                    <th>Сложность</th>
+                    <th>Статус</th>
                 </tr>
                 </thead>
                 <tbody>
                 {quests.map((quest, index) => (
-                    <tr key={quest.id || index}>
-                        <td>{quest.id || '-'}</td>
-                        <td>{quest.name || 'Случайный квест'}</td>
-                        <td>{quest.description || 'Описание отсутствует'}</td>
-                        <td>{quest.reward || '0'}</td>
-                        <td>{quest.difficulty || 'Средняя'}</td>
+                    <tr key={index}>
+                        <td>{quest.questName}</td>
+                        <td>{quest.questCategory}</td>
+                        <td>{quest.userProgress}</td>
+                        <td>{quest.necessaryToReward}</td>
+                        <td>{quest.pointReward}</td>
+                        <td>{quest.isComplete ? 'Завершён' : 'В процессе'}</td>
                     </tr>
                 ))}
                 </tbody>

@@ -5,10 +5,13 @@ export const getUserRole = () => {
     if (!token) return null;
     try {
         const decoded = jwtDecode(token);
-        // Обычно поле называется 'role' или 'roles'. Проверь в консоли свой токен!
         return decoded.roles
     } catch (e) {
         console.error("Can not parse jwt token")
         return null;
     }
+};
+
+export const getDeviceId = () => {
+    return localStorage.getItem("deviceId") || null;
 };

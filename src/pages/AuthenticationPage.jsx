@@ -4,8 +4,12 @@ import { useAuthForms } from "../hooks/useAuthForms";
 import { TokenService } from "../utils/tokenService";
 import { LoginSection, VerifySection } from "../components/AuthForm";
 import RegistrationForm from "../components/RegistrationForm";
+import {getDeviceId} from "../utils/authUtils";
+import {getDeviceName} from "../utils/deviceService";
 
 const AuthenticationPage = ({ initialMode = "login", onSuccess, userRole }) => {
+    const [isNewUser, setIsNewUser] = useState(false);
+    // 1. Сначала ВСЕ хуки (стейты, формы, эффекты)
     const [mode, setMode] = useState(initialMode === "registration" ? "register" : "login");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -23,6 +27,7 @@ const AuthenticationPage = ({ initialMode = "login", onSuccess, userRole }) => {
         }
     }, [initialMode]);
 
+    // 2. Объявление всех функций-обработчиков
     const execute = async (task) => {
         setLoading(true);
         setError(null);
@@ -36,22 +41,55 @@ const AuthenticationPage = ({ initialMode = "login", onSuccess, userRole }) => {
         }
     };
 
-    const handleLogin = () => execute(async () => {
-        await AuthApi.login(loginForm);
-        setVerifyForm(prev => ({ ...prev, email: loginForm.email }));
-        setMode("verify");
-    });
-
-    // НОВАЯ ЛОГИКА LOGOUT
     const handleLogout = () => execute(async () => {
         const refresh = TokenService.getRefresh();
+        const deviceId = getDeviceId(); // Получаем ID устройства
         if (refresh) {
-            await AuthApi.logout(refresh);
+            try {
+                // Отправляем объект согласно RefreshTokenRequestDto
+                await AuthApi.logout(refresh, deviceId);
+            } catch (e) {
+                console.error("Logout API failed", e);
+            }
         }
         TokenService.clear();
         setResendStatus("Вы вышли из системы");
-        // Опционально: перезагрузить страницу или сбросить стейт
         setTimeout(() => window.location.reload(), 1000);
+    });
+
+    const handleLogin = () => execute(async () => {
+        const payload = {
+            email: loginForm.email,
+            password: loginForm.password,
+            deviceId: getDeviceId(),
+            deviceName: getDeviceName(),
+            userAgent: navigator.userAgent
+        };
+
+        try {
+            const res = await AuthApi.login(payload);
+            TokenService.save(res.data);
+            setMode("completed");
+            setTimeout(() => onSuccess ? onSuccess() : window.location.reload(), 1000);
+        } catch (err) {
+            if (err.response?.status === 403) {
+                const newId = err.deviceId || err.response.data?.deviceId;
+                if (newId) {
+                    localStorage.setItem("deviceId", newId);
+                }
+
+                setVerifyForm(prev => ({
+                    ...prev,
+                    email: loginForm.email,
+                    deviceId: newId || getDeviceId()
+                }));
+
+                setMode("verify");
+                setResendStatus("Безопасный вход: подтвердите личность кодом из письма");
+            } else {
+                throw err;
+            }
+        }
     });
 
     const handleRegister = (e, isAdmin = false) => {
@@ -59,30 +97,66 @@ const AuthenticationPage = ({ initialMode = "login", onSuccess, userRole }) => {
         execute(async () => {
             const apiCall = isAdmin ? RegistrationApi.signUpAdmin : RegistrationApi.signUp;
             await apiCall(regForm);
+            setIsNewUser(true); // ЗАПОМИНАЕМ, что это регистрация
             setVerifyForm(prev => ({ ...prev, email: regForm.email }));
             setMode("verify");
         });
     };
 
+    // 3. Исправленный Verify (ДОБАВЛЕНЫ deviceName и userAgent)
     const handleVerify = () => execute(async () => {
-        const res = await AuthApi.verifyEmail(verifyForm);
+        const verifyPayload = {
+            email: verifyForm.email,
+            code: verifyForm.code,
+            deviceId: localStorage.getItem("deviceId") || getDeviceId(),
+            deviceName: getDeviceName(),
+            userAgent: navigator.userAgent
+        };
 
-        // Сохраняем токены через твой TokenService
-        TokenService.save(res);
+        let response;
+        // Используем наш флаг вместо mode
+        if (isNewUser) {
+            response = await RegistrationApi.verifyFirst(verifyPayload);
+        } else {
+            response = await AuthApi.verifyDefault(verifyPayload);
+        }
 
+        TokenService.save(response.data);
         setMode("completed");
-
-        // Вместо перезагрузки всей страницы, плавно переходим в личный кабинет
-        setTimeout(() => {
-            if (onSuccess) {
-                onSuccess(); // Вызываем смену компонента в App.js
-            } else {
-                // Запасной вариант, если пропс не передан
-                window.location.href = "/";
-            }
-        }, 1500);
+        setTimeout(() => onSuccess ? onSuccess() : window.location.reload(), 1500);
     });
 
+    const handleRegisterSubmit = (e) => {
+        if (e) e.preventDefault();
+        // При регистрации мы сразу просим ввести код, который должен был быть
+        // отправлен при каком-то предварительном действии или будет отправлен сейчас
+        setVerifyForm(prev => ({ ...prev, email: regForm.email }));
+        setMode("register"); // Режим регистрации (ввод кода для нового юзера)
+    };
+
+    // 3. Логические проверки (после объявления функций)
+    const isAuthenticated = !!TokenService.getRefresh();
+
+    // Early Return для авторизованного пользователя
+    if (isAuthenticated && (mode === "login" || mode === "register")) {
+        return (
+            <div className="auth-card" style={{ textAlign: 'center', padding: '40px' }}>
+                <div className="auth-body">
+                    <h3>Вы уже в системе</h3>
+                    <p>Вы вошли как <b>{userRole || 'Пользователь'}</b></p>
+                    {resendStatus && <div className="auth-info" style={{color: 'blue'}}>{resendStatus}</div>}
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '20px' }}>
+                        <button onClick={onSuccess} className="btn-success">В личный кабинет</button>
+                        <button onClick={handleLogout} className="btn-danger" disabled={loading}>
+                            {loading ? "Выход..." : "Выйти из аккаунта"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // 4. Основной рендер (для гостей или режима верификации)
     return (
         <div className="auth-card">
             {(mode === "login" || mode === "register") && (
@@ -107,28 +181,12 @@ const AuthenticationPage = ({ initialMode = "login", onSuccess, userRole }) => {
                 {resendStatus && <div className="auth-info" style={{color: 'blue', marginBottom: '10px'}}>{resendStatus}</div>}
 
                 {mode === "login" && (
-                    <>
-                        <LoginSection
-                            form={loginForm}
-                            onChange={handleLoginChange}
-                            onLogin={handleLogin}
-                            loading={loading}
-                        />
-
-                        {/* ДОБАВЛЕНА СЕКЦИЯ ВЫХОДА */}
-                        {TokenService.getRefresh() && (
-                            <div style={{ marginTop: '25px', paddingTop: '20px', borderTop: '1px solid #eee' }}>
-                                <button
-                                    onClick={handleLogout}
-                                    disabled={loading}
-                                    className="btn-danger"
-                                    style={{ padding: '8px 16px', fontSize: '0.85rem' }}
-                                >
-                                   Выйти
-                                </button>
-                            </div>
-                        )}
-                    </>
+                    <LoginSection
+                        form={loginForm}
+                        onChange={handleLoginChange}
+                        onLogin={handleLogin}
+                        loading={loading}
+                    />
                 )}
 
                 {mode === "register" && (
