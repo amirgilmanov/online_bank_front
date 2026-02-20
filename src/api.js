@@ -1,9 +1,9 @@
 import axios from "axios";
 
-const API_URL = process.env.BACKEND_URL
+const VITE_API_URL = process.env.BACKEND_URL
 
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: VITE_API_URL,
     headers: {
         "Content-Type": "application/json",
     },
@@ -60,7 +60,7 @@ api.interceptors.response.use(
             if (refreshToken) {
                 try {
                     // ВАЖНО: твой silentLogin в AuthenticationService ожидает token и deviceId
-                    const res = await axios.post(`${API_URL}/api/silent`, {
+                    const res = await axios.post(`${VITE_API_URL}/api/silent`, {
                         token: refreshToken,
                         deviceId: deviceId
                     });
